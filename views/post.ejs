@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.3/socket.io.min.js" integrity="sha384-WPFUvHkB1aHA5TDSZi6xtDgkF0wXJcIIxXhC6h8OT8EH3fC5PWro5pWJ1THjcfEi" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/js/post.js"></script>
+    <script>
+$(document).ready(function(){
+  var allcomment;
+    var cmtindex = 0;
+
+    let decodedCookie = decodeURIComponent(document.cookie);
+    var user;
+    loggedin();
+    function loggedin(){
+        let decodedCookie = decodeURIComponent(document.cookie);
+        user = decodedCookie.substring(7, undefined);
+        if(user.length <=0) return false; else return true;
+    }
+
+    
+    const tagid = "<%= tag %>"
+    const postid = "<%= post %>"
+
+    try{localStorage.getItem(postid)}
+    catch(e){indexNO = 0}
+
+    const socket = io();
+    socket.on("connect",()=>{
+        // Display(`You have connected: ${socket.id}`)
+        socket.emit("getcomment", postid,(array)=>{
+          // console.log(array)
+          localStorage.setItem(postid, array);
+        try{
+          allcomment = JSON.parse(localStorage.getItem(postid));
+          cmtindex = allcomment[allcomment.length-1].index; 
+          for (let index = 0; index < allcomment.length; index++) {
+            const element = allcomment[index];
+            Display(element.index,element.user,element.detail.comment,element.detail.timestamp)
+           }  }
+        catch(e){
+          cmtindex = 0
+          console.log(e)}
+        })
+    })
+    socket.on("newcomment", (obj)=>{
+      cmtindex += 1
+      newcomment(obj)
+    })
+
+        
+          //  for (let index = cmtindex; index >0; index--) {
+          //   const element = allcomment[index-1];
+          //   Display(element.index,element.user,element.detail.comment,element.detail.timestamp)
+          //  }
+        
+   
+    //newcomment recieve
+    //getcomment
+      function newcomment(obj){
+        var char1 = localStorage.getItem(postid);
+        try{if(char1.length<3){
+          localStorage.setItem(postid, `[${JSON.stringify(obj)}]`)
+        }else{localStorage.setItem(postid,"["+char1.substring(1, char1.length - 1)+","+JSON.stringify(obj)+"]")
+      }}catch{localStorage.setItem(postid, `[${JSON.stringify(obj)}]`)}
+        Display(obj.index,obj.user,obj.detail.comment,obj.detail.timestamp)
+      }
+
+
+
+
+    function Display(index, user, message, date){
+        const content = document.createElement("div");
+        content.className = "contentcomment"
+        // content.style = "float:left;";
+        content.innerHTML = `<div class="index">#${index}</div>
+        <div class="cmtuser">${user}</div><pre style="float:right">${date.substring(5,22)}</pre>
+        <div class="cmtmsg"> ${message}</div> `;
+        $(".content").append(content);
+    };
+    // $("#contentcomment").hover(()=>{
+    //   console.log($(this).html())
+    // })
+    // $("#contentcomment").click(()=>{
+    //   console.log("$(this).html()))")
+    // })
+    //new
+    $("#newpost").submit((e)=>{e.preventDefault();
+        if(loggedin()){
+            const title = $("#newtitle").val().trim();
+            const detail = $("#newdetail").val().trim();
+            $("#newdetail").val("")
+            $("#newtitle").val("")
+            $.post("/newpost",{title: title, detail:detail,tagid:tagid,userid: user},(data)=>{
+                window.location.href=`/post?tag=${tagid}&post=${data}`
+            })
+        }else{alert("please log in")}
+    })
+    $("#newcomment").on("submit", (e)=>{e.preventDefault();
+        if(loggedin()){
+            const cmt = $("#newcmt").val().trim();
+            $("#newcmt").val("")
+            if(cmt.length <=0 ){alert("enter something");}
+            else{
+              // console.log(allcomment[allcomment.length])
+              if(localStorage.getItem(postid).length < 3){var hash = 0}else{
+                // console.log(localStorage.getItem(postid))
+                var comment1 = JSON.parse(localStorage.getItem(postid));
+              var hash = CryptoJS.SHA256(JSON.stringify(comment1[comment1.length-1])).toString()
+              }
+        //       $.get("https://ipinfo.io", function(response) {
+        //     alert(response.ip);
+        // }, "json")
+        console.log(cmtindex)
+              cmtindex += 1
+              const obj = new Block(cmtindex,user,hash,new Content(new Date().toUTCString(),navigator["userAgent"],"ip",cmt))
+              newcomment(obj)
+                socket.emit("newcomment",postid, obj ,(e)=>{
+                })
+            }
+        }else{alert("please log in")}
+        
+    })
+});
+// $(function() {
+// var body = document.getElementsByTagName('body')[0];
+//   var script = document.createElement('script');
+//   script.type = 'text/javascript';
+//   script.src = 'code.js';
+//   body.appendChild(script);
+// });
+    </script>
+    <link rel="stylesheet" href="/css/post.css">
+    <title><%= tagtitle%>-<%= posttitle%></title>
+</head>
+<body>    
+<!-- otp -->
+  <div class="modal fade" id="otpmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">OTP</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+        <form id="otp">
+          <h2>Check your email, <div class="welcomebox"></div></h2>
+          <input type="text" id="otp1">
+          <pre id="invalid">invalid</pre>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary close" data-dismiss="modal">Close</button>
+          <input type="submit" class="btn btn-primary" value="Submit">
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- register -->
+    <div class="modal fade" id="regmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Register</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="register">
+                <input type="email" name="" id="email" placeholder="email">
+                <input type="text" name="" id="username" placeholder="username">
+                <input type="password" name="" id="password2" placeholder="password">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary close" data-dismiss="modal">Close</button>
+              <input type="submit" class="btn btn-primary" value="Submit">
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- login -->
+      <div class="modal fade" id="loginmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" id="loginmodal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Login</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="login">
+                <h2>Welcome, <div id="welcomebox"></div></h2>
+                <input type="password" name="" id="password1" placeholder="password">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary close" data-dismiss="modal">Close</button>
+              <input class="btn btn-primary"type="submit" value="Login">
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- start -->
+    <header>
+        <div class="topnav">
+            <div class="topleftnav">
+                <img src="" alt="">
+                <a href="/">UwU</a>
+            </div>
+            <div class="toprightnav">
+                <input class="form-control me-2" type="search" placeholder="Email/Username" aria-label="Search" id = "joinbox">
+                <button class="btn btn-outline-success" type="submit" id="join">Join</button>
+            </div>
+        </div>
+    </header>
+    <div class="row">
+        <div class="column side">
+          <h2 style="background-color: black;"> <%= tagtitle%></h2>
+          <div class="post" id="post">
+            <% var list = JSON.parse(postdetail) %>
+            <%     for (let index = 0; index < list.length; index++) { %>
+                <div class="postdetail">
+                    <a href='/post?tag=<%=tag%>&post=<%= list[index].post_id%>'>
+                        <p> <%= list[index].title %></p>
+                        <pre><%= list[index].detail %></pre>
+                    </a>
+                </div>
+            <%} %>
+          </div>
+        </div>
+        <div class="column middle">
+            <h2 style="background-color: black;"> <button id="hide" style="font-size: 13px;">hide</button> <%= posttitle%></h2>
+            
+            <div class="content"><%= postcontent %></div>
+            <!-- detail -->
+            <div class="detail">
+                <button onclick="window.location.reload(true)">reload</button>
+                <form id="newcomment" style="display: inline-block ;">
+                    <input id="newcmt" type="text" placeholder="comment">
+                    <input type="submit" value="Send">
+                </form>
+                <form id="newpost">
+                    <input id="newtitle" type="text" placeholder="title">
+                    <input id="newdetail" type="text" placeholder="detail">
+                    <input is="submitnewpost"type="submit" value="New Post">
+                </form>  
+            </div>
+            
+            </div>
+        </div>
+        </div>
+          
+    <footer>
+        
+    </footer>
+</body>
+</html>

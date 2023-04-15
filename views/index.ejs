@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.3/socket.io.js" integrity="sha512-iWPnCISAd/J+ZacwV2mbNLCaPGRrRo5OS81lKTVPtRg1wGTC20Cfmp5Us5RcbLv42QLdbAWl0MI57yox5VecQg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="/js/website.js"></script>
+    <link rel="stylesheet" href="/css/index.css">
+    <title>NHF</title>
+    <script>
+        $(document).ready(()=>{
+            var trend = '<%- trend %>';
+            var data = JSON.parse(trend)
+            for (let index = 0; index < data.length; index++) {
+                // console.log(data[index].tagid)
+                // console.log(data[index].title)
+                const block = document.createElement("a")
+                block.href = `/post?tag=${data[index].tagid}&post=-1`
+                // block.style = "margin: 0 3px;"
+                block.innerHTML = data[index].title;
+                // console.log(block.outerHTML)
+                $(".trendingbox").append(block)
+            }
+            
+        })
+    </script>
+</head>
+<body>
+    <!-- register -->
+    <div class="modal fade" id="regmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Register</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="register">
+                <input type="email" name="" id="email" placeholder="email">
+                <input type="text" name="" id="username" placeholder="username">
+                <input type="password" name="" id="password2" placeholder="password">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary close" data-dismiss="modal">Close</button>
+              <input type="submit" class="btn btn-primary" value="Submit">
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- login -->
+      <div class="modal fade" id="loginmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" id="loginmodal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Login</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="login">
+                <h2>Welcome, <div id="welcomebox"></div></h2>
+                <input type="password" name="" id="password1" placeholder="password">
+                <pre id="invalid">invalid password <a style="color: rgb(0, 89, 255);" id="forgot">forgot?</a></pre>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary close" data-dismiss="modal">Close</button>
+              <input class="btn btn-primary"type="submit" value="Login">
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- start -->
+    <header>
+        <div class="topnav">
+            <div class="topleftnav">
+                <img src="" alt="">
+                <a>UwU</a>
+            </div>
+            <div class="toprightnav">
+                <input class="form-control me-2" type="search" placeholder="Email/Username" aria-label="Search" id = "joinbox">
+                <button class="btn btn-outline-success" type="submit" id="join">Join</button>
+            </div>
+        </div>
+    </header>
+    <div class="search">
+        <h1>New Hall Forum</h1>
+        <div class="searchbox">
+            <input id="searchbox" class="form-control" type="search" placeholder="Search" aria-label="Search">
+            <button type="submit"><i style="margin: 0;" class="fa fa-search"></i></button>    
+        </div>
+        <div id="result"></div>
+         <button id="random" class="btn btn-outline-success" type="submit">Random</button>
+        <button class="btn btn-outline-success" type="submit" id="createnew">Create!!</button>
+       <div class="trending">
+            <div class="trendingbox">
+                <h2 style="display:inline">Trending: </h2>
+            </div>
+        </div>
+    </div>
+    <footer>
+      
+    </footer>
+</body>
+</html>
+<!-- Type in username or email
+Check via post
+If yes keep login
+If no register + email sent -->
+
+
+<!-- <table>
+   <tr>
+      <th>Dimension</th><th>Quantity</th><th>Factory: rx</th>
+   </tr>
+
+   <% for (var i = 0; i < quotation.length; /* I save the data in a variable 'quotation', I don't know how you named your variable  */  i++) { %>
+    <tr>
+      <td><%= quotation[i].dimension %></td>
+      <td><%= quotation[i].quantity %></td>
+      <td><%= quotation[i].factory %></td>
+    </tr>    
+   <% } %>
+</table> -->

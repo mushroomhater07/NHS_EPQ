@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.3/socket.io.min.js" integrity="sha384-WPFUvHkB1aHA5TDSZi6xtDgkF0wXJcIIxXhC6h8OT8EH3fC5PWro5pWJ1THjcfEi" crossorigin="anonymous"></script>
+    <script>
+$(document).ready(function(){
+
+    const socket = io("http://localhost");
+            console.log("hiis")
+            socket.on("connection",()=>{
+                // console.log()
+            })
+
+
+    $.post("/post",{tag:"<%= session%>",post:"<%= sessionpost%>"},(data,status) =>{
+        $("#content").html(""); 
+        console.log(data.comment)
+        for (let index = 0; index < data.comment.length; index++) {
+            const element = data.comment[index];
+            var div = document.createElement("div");
+            div.className = "cmt";
+            div.style = "border-bottom: 5px blue inset;"
+            div.innerHTML = element.detail;
+            document.getElementById("section").append(div);
+        }
+        $("#post").html("");
+        // console.log(data.postdetail)
+        for (let index = 0; index < data.postdetail.length; index++) {
+            const element = data.postdetail[index];
+            var div = document.createElement("div");
+            div.className = "postlist";
+            div.style = "border-bottom: 5px blue inset;"
+            div.innerHTML = element.title;
+            document.getElementById("post").append(div);
+        }
+        // console.log(data.title);
+        $("#title1").html(data.title);
+        $("#channel").html(data.channel);
+    })
+    // console.log(comment)
+
+    // var post = JSON.parse(postdget);
+    // console.log(JSON.parse(post)[0].title);
+    // const io = require("socket.io-client");
+    // function reloadcmt(){for (let index = 0; index < comment[0].length; index++) {
+    //    
+    // };}reloadcmt()
+    
+    $("#remove").click(function(){
+        array.forEach(element => {
+        });
+    })
+    // socket.on("connect", () => {
+    // console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+    // });
+
+    // socket.on("disconnect", () => {
+    // console.log(socket.id); // undefined
+    // });
+    $("#join").click(function(){
+        var valid = true;
+        var email = false;
+        var spacevalid = true;
+        var inputjoin = $("#inputjoin").val().trim();
+        Array.from(inputjoin).forEach(
+            (e, i) => { var x = e.charCodeAt(0);
+                if(x == 32 || x == 10){//32 spacebar//10next line
+                    spacevalid = false;
+                }else if(x == 64){
+                    email = true;
+                }else if((x >= 48 && x <= 57) || (x >= 65 && x <= 90) || (x>=97 && x<=122)){}
+                else{
+                    valid = false;
+                }
+            });
+            if (inputjoin != 0 || spacevalid == true){
+                if(email == true){
+                    $.post("/formpost", {email: true, input: inputjoin}, (data, status)=>{
+                        console.log(data);
+                        console.log(status)
+                    })
+                }else if(email == false && valid == true){
+                    $.post("/formpost", {email: false, input: inputjoin}, (data, status)=>{
+                        console.log(data);
+                        console.log(status)
+                    })
+                }else{
+                    alert("Username should not have symbol");
+                }
+            }else{
+                alert("invalid input")
+            }
+        });
+    $("#subcomment").click(function(){
+        var userid = 1
+        var input = $("#commentdetail").val(); //.trim()
+        if (input.length > 0){
+            var i = 0; var x = "";
+        do {
+            x = input[i].charCodeAt(0);
+            if(x == 32 || x == 10){
+                i++;
+            }else{break;}
+        } while (true); 
+        input = input.substring(i);}
+        console.log(sessionpost)
+        $.post("/createcomment", {commentdetail: input, postid: sessionpost, userid: userid},function(data){
+            console.log(data)
+            //socket.io
+        })
+    });
+    $("#subtopic").click(function(){console.log("topic posting")
+        var title = $("#topictitle").val().trim(); 
+        var detail = $("#topicdetail").val().trim();
+        if(title.length == 0 || detail.length == 0){
+            alert("Please enter valid data");
+        }else{
+            console.log(title, detail)
+            $.post("/createpost", {titletopic: title, detail: detail, tag: "<%= session%>"}, function(data){
+                // window.location.href = `/post?tag=${data.tag}&post=${data.post}`
+            })
+        }
+    });
+          // function changeUrl(href)
+        // {
+        // $('.middle').load(href);
+        // href = (href == "") ? "/" : href;
+        // uri = window.location.href.split("#/");
+        // window.location.href = uri[0] + "#/" + href;
+        // }
+    });
+    </script>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* overflow: hidden; */
+    
+}
+html{
+  color-scheme: dark !important;
+    position: relative;
+    
+}
+body {
+  margin: 0;
+  overflow: hidden;
+}
+.topnav {
+  overflow: hidden;
+  background-color: #333;
+  margin: auto 0;
+}
+.topleftnav *{
+  float: left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  font-size: 25px;
+  margin: 6.25px 0;
+  margin-left: 30px;;
+  text-decoration: none;
+}
+.toprightnav{
+  float: right;   /*ignore the block */
+  margin: 6px 0;
+  margin-right: 20px;
+  display: flex;
+  color: #f2f2f2;
+  text-align: center;
+  text-decoration: none;
+}
+/* Create three unequal columns that floats next to each other */
+.column {
+  float: left;
+  padding: 10px;
+  
+}
+
+/* Left and right column */
+.column.side {
+  width: 20%;
+  background-color: aquamarine;
+}
+
+/* Middle column */
+.column.middle {
+    background-color: yellowgreen;
+  width: 60%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .column.side, .column.middle {
+    width: 100vw;
+    margin-left:10px;
+  }
+}
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <header>
+        <div class="topnav">
+            <div class="topleftnav">
+                <img src="" alt="">
+                <a href="/">NH Forum</a>
+            </div>
+            <div class="toprightnav">
+                <input class="form-control me-2" type="search" placeholder="Email/Username" aria-label="Search" id="inputjoin">
+                <button class="btn btn-outline-success" type="submit" id="join">Join</button>
+            </div>
+        </div>
+    </header>
+    <!-- <button id="create">hii</button><button id="remove">hii</button> -->
+    <div class="row">
+        <div class="column side">
+          <h2 style="background-color: black;" id="channel"></h2>
+          <div class="post" id="post"></div>
+          <!-- for (var i = 0; i < post[0].length; i++) { %> -->
+                  <!-- <a onclick="console.log(location.href=this.href+'?tag='+ '= title %>'+'&post=')">= post[i].title %></a>  -->
+               <!--  } %> -->
+          <!-- <div class="postsec">
+h               ref="/post" 
+          </div> -->
+        </div>
+        
+        <div class="column middle" id="section">
+            <h2 id="title1" style="background-color: black;"></h2>
+            <!-- <p>= post[0].content %></p> -->
+            <div class="content"></div>
+        </div>
+        
+        <div class="column side">
+          <h2><a href="#" onclick="//window.location.href">to load</a></h2>
+          <h2>comment:</h2>
+          <textarea name="" id="commentdetail" cols="30" rows="3"></textarea>
+          <button id="subcomment">post</button>
+          <h2>post new topic</h2>
+          <input type="text" name="" id="topictitle" placeholder="title">
+          <textarea name="" id="topicdetail" cols="30" rows="3" placeholder="detail"></textarea>
+          <button id="subtopic">post</button>
+
+          

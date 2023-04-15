@@ -1,0 +1,22 @@
+import "isomorphic-fetch"; // or import the fetch polyfill you installed
+import { Client } from "@microsoft/microsoft-graph-client";
+
+const authProvider = {
+    'clientId': 'bcfadd63-7bf2-448f-8791-60f23a4d956f',
+    'clientSecret': 'YOUR_CLIENT_SECRET_HERE_IF_USING_APP_ONLY',
+    'tenantId': 'b12d2519-6980-4082-8171-2f8ce70dadb3',
+    'authTenant': 'common',
+    'graphUserScopes': [
+      'user.read',
+      'mail.read',
+      'mail.send'
+    ]}
+const options = {
+	authProvider,
+};
+const client = Client.init(options);
+
+const sendMail = {message: {subject: 'Meet for lunch?',body: {contentType: 'Text',content: 'The new cafeteria is open.'},toRecipients: [{emailAddress: {address: 'chinghey.lau@newhallstudent.co.uk'}}]}};
+
+await client.api('/me/sendMail')
+	.post(sendMail);

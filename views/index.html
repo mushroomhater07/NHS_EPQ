@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.3/socket.io.js" integrity="sha512-iWPnCISAd/J+ZacwV2mbNLCaPGRrRo5OS81lKTVPtRg1wGTC20Cfmp5Us5RcbLv42QLdbAWl0MI57yox5VecQg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    
+    <script>
+        $(document).ready(function(data) {
+            
+            $.post("/trend",{} ,(data)=>{
+                console.log(data.length)
+                for (let index = 0; index < data.length; index++) {
+                    // console.log(data[index].tagid)
+                    const block = document.createElement("a")
+                    block.href = `/post?tag=${data[index].tagid}&post=-1`
+                    // block.style = "margin: 0 3px;"
+                    block.innerHTML = data[index].title;
+                    $(".trendingbox").append(block);
+                }
+            })
+
+            $("#searchbox").keyup(function(){
+                $("#result").html("");
+                // .remove();
+                const sql = $("#searchbox").val().trim();
+                    $.post("/gettag", {connect : sql}, function(data){
+                        $("#result").html("")
+                        for (let index = 0; index < data[0].length; index++) {
+                            const block = document.createElement("a")
+                            block.href = `/post?tag=${data[1][index]}&post=-1`
+                            block.style = "margin: 0 3px;"
+                            block.innerHTML = data[0][index];
+                            $("#result").append(block)
+                            // console.log(data[1][index])
+                        }
+                    });
+                if( $("#searchbox").val().trim() == ""){}
+                // else{
+                    // document.getElementById("result").innerHTML.trim() == "";
+                //     var button = document.createElement("button");
+                //     button.innerHTML= "Create New Tag";
+                //     button.style = "margin-top: 10px;";
+                //     button.id = "createnew";
+                //     button.setAttribute('onclick',"createnew1()");
+                //     $("#result").append(button);
+        });
+        $("#createnew").click(function(){
+            if($("#searchbox").val().trim().length == 0){alert("Please enter something");}else{
+            $.post("/createtag", {tag: $("#searchbox").val().trim()}, function(data){
+                if(data.msg == "created"){
+                    alert("topic is created")
+                }
+                // console.log(data.href[0].tagid)
+                window.location.href = `/post?tag=${data.href[0].tagid}&post=-1`
+            })}
+        })
+        $("#random").click(function(){
+            $.post("/gettag", {mode : "random"}, function(data){
+                const tagid = data[0];
+                window.location.href = `/post?tag=${tagid}&post=-1`
+            });
+        })
+    })
+    </script>
+    <style>
+* {
+    box-sizing: border-box;
+    /* overflow: hidden; */
+    
+}
+html{
+  color-scheme: dark !important;
+    position: relative;}
+body {
+  margin: 0;
+  /* overflow: hidden; */
+}
+.topnav {
+  overflow: hidden;
+  background-color: #333;
+  margin: auto 0;
+}
+.topleftnav *{
+  float: left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  font-size: 25px;
+  margin: 6.25px 0;
+  margin-left: 30px;;
+  text-decoration: none;
+}
+.toprightnav{
+  float: right;   /*ignore the block */
+  margin: 6px 0;
+  margin-right: 20px;
+  display: flex;
+  color: #f2f2f2;
+  text-align: center;
+  text-decoration: none;
+}
+.search{
+    
+margin: auto 0;
+padding: 0;margin-top: 100px;
+text-align: center;
+align-items: center;
+}
+/* .btn-outline-success{
+    min-width: 100px;
+} */
+.searchbox{
+    margin: 0 auto;
+    width: 50%;
+    min-width: 300px;
+    display: flex;
+}
+#random, #createnew{
+    width:100px;
+    margin-top: 10px;
+}
+footer{
+    position: fixed;
+   bottom: 0;
+   width: 100%;
+   height: 40px;   /* Height of the footer */
+   background: #6cf;
+}
+.trendingbox{
+    margin-top: -20px;    
+    margin: 0 auto;
+    width: 50%;
+    min-width: 300px;
+    max-width: 90vw;
+}
+.trendingbox *{
+    margin: 0 10px;
+
+}
+.trendingbox a{
+    color: rgb(35, 148, 253);
+    text-decoration: underline;
+}
+.trendingbox :hover {
+  color: rgb(85, 169, 247);
+}
+.result{
+    margin: 0 auto;
+    width: 50%;
+    min-width: 300px;
+    max-height: 100px;
+    /* overflow: auto; */
+}
+.result a{
+font-size: 25px;
+text-decoration: none;
+color: rgb(35, 148, 253);
+margin:0 10px;
+}
+.result :hover {
+  color: rgb(85, 169, 247);
+}
+
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <header>
+        <div class="topnav">
+            <div class="topleftnav">
+                <img src="" alt="">
+                <a>UwU</a>
+            </div>
+            <div class="toprightnav">
+                <input class="form-control me-2" type="search" placeholder="Email/Username" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit" id="join">Join</button>
+            </div>
+        </div>
+    </header>
+    <div class="search">
+        <h1>New Hall Forum</h1>
+        <div class="searchbox">
+            <input id="searchbox" class="form-control" type="search" placeholder="Search" aria-label="Search">
+            <button type="submit"><i style="margin: 0;" class="fa fa-search"></i></button>    
+        </div>
+        <div id="result"></div>
+         <button id="random" class="btn btn-outline-success" type="submit">Random</button>
+        <button class="btn btn-outline-success" type="submit" id="createnew">Create!!</button>
+       <div class="trending">
+            <div class="trendingbox">
+                <h2 style="display:inline">Trending: </h2>
+            </div>
+        </div>
+    </div>
+    <footer>
+        hi
+    </footer>
+</body>
+</html>
