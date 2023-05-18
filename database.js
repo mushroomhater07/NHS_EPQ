@@ -1,10 +1,10 @@
 const mysql = require('mysql2');
 module.exports = mysql.createConnection({
-    host: "fact.shalevportal.ml",
-      port: 2086,
-      user: "hey",
-      password: "Ss12345678*",
-      database: 'blockchain',
+    host: "sql7.freesqldatabase.com",
+      port: 3306,
+      user: "sql7619301",
+      password: "2kM3dH4h7x",
+      database: 'sql7619301',
       multipleStatements: true,
       debug: false,
 })
