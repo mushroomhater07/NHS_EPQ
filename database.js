@@ -1,6 +1,6 @@
 const mysql = require('mysql2');
 module.exports = mysql.createConnection({
-    host: "php.shalev.eu.org",
+    host: "php.shalevportal.eu.org",
       port: 2086,
       user: "github",
       password: "Ss123456789*",
