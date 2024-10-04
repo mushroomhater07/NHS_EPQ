@@ -2,6 +2,7 @@
   "dependencies": {
     "@microsoft/microsoft-graph-client": "^3.0.2",
     "crypto-js": "^4.1.1",
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
     "mysql2": "^2.3.3",
@@ -18,7 +19,5 @@
   "main": "server.js",
   "author": "",
   "license": "ISC",
-  "description": "",
-  "devDependencies": {
-  }
+  "description": ""
 }
