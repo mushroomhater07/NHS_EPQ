@@ -153,7 +153,9 @@ app.post('/login', async(req, res)=>{
 // app.post("/checkforgot")
 
 
-server.listen(port, ()=>{console.log("port" + port)}); //open server 3000
+server.listen(port, ()=>{console.log("port" + port)
+    require('dotenv').config();
+}); //open server 3000
 //socket.io begins
 io.on("connection", (socket)=>{
     socket.on("getcomment",async(postid,cb)=>{
