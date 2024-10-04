@@ -1,16 +1,20 @@
 const express = require('express');
 const app = express();
+const port = 80;
+
 const server = require('http').createServer(app);
 const io = require ("socket.io")(server, {cors:{origin:["*"],},});
-const port = 80;
-const db = require("./database");
-const block = require("./post.js")
-const fs = require('fs');
+
 const crypto = require('crypto-js');
+const fs = require('fs');
+const db = require("./database");
 const mail = require('./mailer')
+// const block = require("./post.js")
+
 // const authHelper = require('./authHelper')
 // app.set('views', './views');
 app.set("view engine", "ejs");
+
 app.use('/js',express.static(__dirname+'/views/js'));
 app.use('/css',express.static(__dirname+'/views/css'));
 app.use(express.json());           //accept data in JSON format

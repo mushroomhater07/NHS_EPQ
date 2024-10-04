@@ -1,5 +1,6 @@
-var clientId = 'bcfadd63-7bf2-448f-8791-60f23a4d956f';
-var clientSecret = 'af850192-d8b5-493b-892e-38e9a2f4bb39';
+require("dotenv").config();
+var clientId = process.env.MICROSOST_CLIENT_ID;
+var clientSecret = process.env.MICROSOFT_SECRET;
 var redirectUri = 'http://localhost:3000/authorize';
 
 var scopes = [

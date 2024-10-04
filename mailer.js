@@ -2,11 +2,12 @@ module.exports = {send}
 
 async function send(email,subject, otp){"use strict";
   const nodemailer = require("nodemailer");
+  require('dotenv').config();
   var transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
         user: "nhforum1@gmail.com",
-        pass: "lcevtrjecmlaqfpv"
+        pass: process.env.MAILER_APP_PASS
     }
 });
 
